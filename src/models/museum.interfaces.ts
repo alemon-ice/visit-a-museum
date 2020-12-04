@@ -1,0 +1,15 @@
+export type WeekDaysType = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"
+
+export interface ITime_week_day {
+  week_day: WeekDaysType
+  start_time: string
+  end_time: string
+}
+
+export interface IMuseumData {
+  id: string
+  image_url: string
+  name: string
+  people_limit: number
+  week_days: ITime_week_day[]
+}
