@@ -84,28 +84,33 @@ export default function Home() {
         const [day] = weekDay.week_day.split('-')
         return day === dateWeekDay
       })
-      const startTimeIsWI = isWithinInterval(startDateTime, { start: parseISO(`${date}T${selectedWeekDay.start_time}`), end: parseISO(`${date}T${selectedWeekDay.end_time}`) })
-      const endTimeIsWI = isWithinInterval(endDateTime, { start: parseISO(`${date}T${selectedWeekDay.start_time}`), end: parseISO(`${date}T${selectedWeekDay.end_time}`) })
 
-      if (startTimeIsWI && endTimeIsWI) {
-
-        selectedMuseumVisits.forEach((visit: IVisitData) => {
-          const startTimeIsWI = isWithinInterval(startDateTime, { start: parseISO(`${visit.date}T${visit.start_time}`), end: parseISO(`${visit.date}T${visit.end_time}`) })
-          const endTimeIsWI = isWithinInterval(endDateTime, { start: parseISO(`${visit.date}T${visit.start_time}`), end: parseISO(`${visit.date}T${visit.end_time}`) })
-
-          if (startTimeIsWI || endTimeIsWI) {
-            totalQuantity += visit.people_quantity
-          }
-        })
-
-        const [peopleQuantityMuseum] = museums.filter(m => m.id === selectedMuseum.id && m)
-
-        return totalQuantity > peopleQuantityMuseum.people_limit ? false : true
-
+      if (selectedWeekDay === undefined) {
+        return `O ${selectedMuseum.name} não abre neste dia da semana`
       } else {
-        return 'Horário selecionado fora do horário de funcionamento'
-      }
 
+        const startTimeIsWI = isWithinInterval(startDateTime, { start: parseISO(`${date}T${selectedWeekDay.start_time}`), end: parseISO(`${date}T${selectedWeekDay.end_time}`) })
+        const endTimeIsWI = isWithinInterval(endDateTime, { start: parseISO(`${date}T${selectedWeekDay.start_time}`), end: parseISO(`${date}T${selectedWeekDay.end_time}`) })
+
+        if (startTimeIsWI && endTimeIsWI) {
+
+          selectedMuseumVisits.forEach((visit: IVisitData) => {
+            const startTimeIsWI = isWithinInterval(startDateTime, { start: parseISO(`${visit.date}T${visit.start_time}`), end: parseISO(`${visit.date}T${visit.end_time}`) })
+            const endTimeIsWI = isWithinInterval(endDateTime, { start: parseISO(`${visit.date}T${visit.start_time}`), end: parseISO(`${visit.date}T${visit.end_time}`) })
+
+            if (startTimeIsWI || endTimeIsWI) {
+              totalQuantity += visit.people_quantity
+            }
+          })
+
+          const [peopleQuantityMuseum] = museums.filter(m => m.id === selectedMuseum.id && m)
+
+          return totalQuantity > peopleQuantityMuseum.people_limit ? false : true
+
+        } else {
+          return 'Horário selecionado fora do horário de funcionamento'
+        }
+      }
     }
   }
 
