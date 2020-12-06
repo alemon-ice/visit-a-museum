@@ -1,4 +1,4 @@
-export interface IScheduleData {
+export interface IVisitData {
   id: number
   museum_id: string
   date: string
@@ -7,7 +7,7 @@ export interface IScheduleData {
   people_quantity: number
 }
 
-export interface INewSchedule {
+export interface INewVisit {
   museum_id: string
   date: string
   start_time: string

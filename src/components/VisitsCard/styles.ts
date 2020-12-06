@@ -39,11 +39,11 @@ export const Container = styled.div`
       font-size: 1.1rem;
     }
 
-    h3, .visits, .schedule-item {
+    h3, .visits, .visit-item {
       margin-bottom: 0.6rem;
     }
 
-    .visits, .schedule-item {
+    .visits, .visit-item {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -54,7 +54,7 @@ export const Container = styled.div`
     }
   }
 
-@keyframes open-museum-schedules {
+@keyframes open-museum-visits {
   from {
     transform: translateX(+30vw);
   }
@@ -64,7 +64,7 @@ export const Container = styled.div`
   }
 }
 
-@keyframes close-museum-schedules {
+@keyframes close-museum-visits {
   from {
     transform: translateX(0vw);
   }
@@ -74,11 +74,11 @@ export const Container = styled.div`
   }
 }
 
-&#open-museum-schedules {
-  animation: open-museum-schedules 2s;
+&#open-museum-visits {
+  animation: open-museum-visits 2s;
 }
 
-&#close-museum-schedules {
-  animation: close-museum-schedules 1s;
+&#close-museum-visits {
+  animation: close-museum-visits 1s;
 }
 `;

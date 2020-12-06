@@ -4,18 +4,18 @@ import BR from 'date-fns/locale/pt-BR'
 
 import { Container } from './styles';
 
-import { IScheduleData } from 'models/schedule.interfaces';
+import { IVisitData } from 'models/visit.interfaces';
 import { IMuseumData } from 'models/museum.interfaces';
 
 interface IMuseumCardProps {
-  schedules: IScheduleData[]
+  visits: IVisitData[]
   museum: IMuseumData
   date: string
   id: string
 }
 
-const MuseumCard = (props: IMuseumCardProps): JSX.Element => {
-  const { schedules, museum, date, id } = props
+const VisitsCard = (props: IMuseumCardProps): JSX.Element => {
+  const { visits, museum, date, id } = props
 
   const [formatedDate, setFormatedDate] = useState<string>('')
 
@@ -31,11 +31,11 @@ const MuseumCard = (props: IMuseumCardProps): JSX.Element => {
         <h3>Visitas para {formatedDate}:</h3>
         <div className="visits">
           {
-            schedules.length > 0
-              ? schedules.map((scheduleItem: IScheduleData) => (
-                <div className="schedule-item" key={scheduleItem.id}>
-                  <p className="day">Visita de <strong>{scheduleItem.people_quantity}</strong> pessoas:</p>
-                  <p className="time">das <strong>{scheduleItem.start_time}</strong> às <strong>{scheduleItem.end_time}</strong></p>
+            visits.length > 0
+              ? visits.map((visitItem: IVisitData) => (
+                <div className="visit-item" key={visitItem.id}>
+                  <p className="day">Visita de <strong>{visitItem.people_quantity}</strong> pessoas:</p>
+                  <p className="time">das <strong>{visitItem.start_time}</strong> às <strong>{visitItem.end_time}</strong></p>
                 </div>
               )) : <span>Não há agendamentos para este museu</span>
           }
@@ -45,4 +45,4 @@ const MuseumCard = (props: IMuseumCardProps): JSX.Element => {
   );
 }
 
-export default MuseumCard;
+export default VisitsCard;

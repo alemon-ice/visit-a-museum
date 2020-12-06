@@ -1,2 +1,2 @@
 export { default as MuseumCard } from './MuseumCard'
-export { default as SchedulesCard } from './SchedulesCard'
+export { default as VisitsCard } from './VisitsCard'

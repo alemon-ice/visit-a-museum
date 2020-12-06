@@ -4,58 +4,45 @@ import { isPast, parseISO, intervalToDuration, format, isWithinInterval, isBefor
 import BR from 'date-fns/locale/pt-BR'
 
 import api from 'services/api'
+import axios from 'axios'
 
-import { MuseumCard, SchedulesCard } from 'components/index'
+import { MuseumCard, VisitsCard } from 'components/index'
 
 import { Container, Footer } from 'styles/pages/Home'
 
 import museumLogo from '../assets/museum.svg'
 
+import { museums } from 'utils/museums'
+
 import { IMuseumData } from 'models/museum.interfaces'
-import { INewSchedule, IScheduleData } from 'models/schedule.interfaces'
+import { INewVisit, IVisitData } from 'models/visit.interfaces'
 
 export default function Home() {
-  const [museums, setMuseums] = useState<IMuseumData[]>([])
-  const [schedules, setSchedules] = useState<IScheduleData[]>([])
-
   const [selectedMuseum, setSelectedMuseum] = useState<IMuseumData | undefined>()
   const [museumCardId, setMuseumCardId] = useState<'open-museum-details' | 'close-museum-details'>('close-museum-details')
-  const [selectedMuseumSchedules, setSelectedMuseumSchedules] = useState<IScheduleData[] | undefined>()
-  const [museumSchedulesId, setMuseumSchedulesId] = useState<'open-museum-schedules' | 'close-museum-schedules'>('close-museum-schedules')
+  const [selectedMuseumVisits, setSelectedMuseumVIsits] = useState<IVisitData[] | undefined>()
+  const [museumVisitsId, setMuseumVisitsId] = useState<'open-museum-visits' | 'close-museum-visits'>('close-museum-visits')
 
-  const [museum, setMuseum] = useState<string>('')
   const [date, setDate] = useState<string>('')
   const [startTime, setStartTime] = useState<string>('')
   const [endTime, setEndTime] = useState<string>('')
   const [peopleQuantity, setPeopleQuantity] = useState<number>(0)
 
   const [isEmpty, setIsEmpty] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [errors, setErrors] = useState<string[]>([])
 
   useEffect(() => {
-    initialRequest()
-  }, [])
-
-  useEffect(() => {
     handleCheckFields()
-  }, [museum, date, peopleQuantity])
-
-  async function initialRequest() {
-    const { data: museums } = await api.get('museums')
-    setMuseums(museums)
-    const { data: schedules } = await api.get('schedules')
-    setSchedules(schedules)
-  }
+  }, [selectedMuseum, date, peopleQuantity])
 
   function handleCheckFields() {
-    const isEmpty = !!museum && !!date && (peopleQuantity > 0)
+    const isEmpty = !!selectedMuseum && !!date && (peopleQuantity > 0)
 
     setIsEmpty(!isEmpty)
   }
 
   function handleChangeMuseum(museumId: string) {
-    setMuseum(museumId)
-
     setMuseumCardId('close-museum-details')
 
     setTimeout(() => {
@@ -69,15 +56,13 @@ export default function Home() {
   function handleChangeDate(date: string) {
     setDate(date)
 
-    setMuseumSchedulesId('close-museum-schedules')
+    setMuseumVisitsId('close-museum-visits')
 
-    setTimeout(() => {
-      const selectedMuseumSchedules = schedules.filter(scheduleItem => {
-        return scheduleItem.museum_id === museum && scheduleItem.date === date
-      })
-      setSelectedMuseumSchedules(selectedMuseumSchedules)
+    setTimeout(async () => {
+      const { data } = await axios.get(`/api/visits/${selectedMuseum.id}?date=${date}`)
+      setSelectedMuseumVIsits(data.visits)
 
-      setMuseumSchedulesId('open-museum-schedules')
+      setMuseumVisitsId('open-museum-visits')
     }, 700)
   }
 
@@ -94,7 +79,6 @@ export default function Home() {
       let totalQuantity = peopleQuantity
 
       const dateWeekDay = format(parseISO(date), "EEEE", { locale: BR })
-      const selectedMuseum = museums.find(museumItem => museumItem.id === museum)
 
       const selectedWeekDay = selectedMuseum.week_days.find(weekDay => {
         const [day] = weekDay.week_day.split('-')
@@ -105,19 +89,16 @@ export default function Home() {
 
       if (startTimeIsWI && endTimeIsWI) {
 
-        schedules.forEach((schedule: IScheduleData) => {
-          if (schedule.date === date && schedule.museum_id.toString() === museum) {
-            const startTimeIsWI = isWithinInterval(startDateTime, { start: parseISO(`${schedule.date}T${schedule.start_time}`), end: parseISO(`${schedule.date}T${schedule.end_time}`) })
-            const endTimeIsWI = isWithinInterval(endDateTime, { start: parseISO(`${schedule.date}T${schedule.start_time}`), end: parseISO(`${schedule.date}T${schedule.end_time}`) })
+        selectedMuseumVisits.forEach((visit: IVisitData) => {
+          const startTimeIsWI = isWithinInterval(startDateTime, { start: parseISO(`${visit.date}T${visit.start_time}`), end: parseISO(`${visit.date}T${visit.end_time}`) })
+          const endTimeIsWI = isWithinInterval(endDateTime, { start: parseISO(`${visit.date}T${visit.start_time}`), end: parseISO(`${visit.date}T${visit.end_time}`) })
 
-            if (startTimeIsWI || endTimeIsWI) {
-              totalQuantity += schedule.people_quantity
-            }
+          if (startTimeIsWI || endTimeIsWI) {
+            totalQuantity += visit.people_quantity
           }
-
         })
 
-        const [peopleQuantityMuseum] = museums.filter(m => m.id === museum && m)
+        const [peopleQuantityMuseum] = museums.filter(m => m.id === selectedMuseum.id && m)
 
         return totalQuantity > peopleQuantityMuseum.people_limit ? false : true
 
@@ -144,7 +125,7 @@ export default function Home() {
   }
 
   function clearFields() {
-    setMuseum("")
+    setSelectedMuseum(undefined)
     setDate("")
     setStartTime("")
     setEndTime("")
@@ -159,9 +140,10 @@ export default function Home() {
     if (errors.length > 0) {
       setErrors(errors)
     } else {
+      setIsLoading(true)
 
-      const newSchedule: INewSchedule = {
-        museum_id: museum,
+      const newVisit: INewVisit = {
+        museum_id: selectedMuseum.id,
         date,
         start_time: startTime,
         end_time: endTime,
@@ -169,16 +151,14 @@ export default function Home() {
       }
 
       try {
-        await api.post('schedules', newSchedule)
+        axios.post('/api/visits/create_visit', { visit: newVisit })
 
         alert('Visita agendada com sucesso.')
       } catch (err) {
         alert('Ops, erro ao salvar.\nPor favor, tente novamente.')
       } finally {
         clearFields()
-        initialRequest()
-        // setMuseumCardId('close-museum-details')
-        // setMuseumSchedulesId('close-museum-schedules')
+        setIsLoading(false)
       }
     }
 
@@ -222,7 +202,7 @@ export default function Home() {
                 <input
                   type="date"
                   id="date"
-                  disabled={!(!!museum)}
+                  disabled={!(!!selectedMuseum)}
                   value={date}
                   onChange={e => handleChangeDate(e.target.value)}
                 />
@@ -257,7 +237,7 @@ export default function Home() {
                 }
                 <button
                   type="button"
-                  disabled={isEmpty}
+                  disabled={isEmpty || isLoading}
                   className={isEmpty ? 'disabled' : ''}
                   onClick={handleSubmit}
                 >
@@ -268,8 +248,8 @@ export default function Home() {
           </div>
 
           {
-            selectedMuseumSchedules && selectedMuseum
-              ? <SchedulesCard id={museumSchedulesId} date={date} schedules={selectedMuseumSchedules} museum={selectedMuseum} />
+            selectedMuseumVisits && selectedMuseum
+              ? <VisitsCard id={museumVisitsId} date={date} visits={selectedMuseumVisits} museum={selectedMuseum} />
               : <div style={{ flex: '1' }} />
           }
 

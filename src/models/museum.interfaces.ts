@@ -1,4 +1,4 @@
-export type WeekDaysType = "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"
+export type WeekDaysType = "segunda-feira" | "terça-feira" | "quarta-feira" | "quinta-feira" | "sexta-feira" | "sábado" | "domingo"
 
 export interface ITime_week_day {
   week_day: WeekDaysType
