@@ -3,7 +3,6 @@ import Head from 'next/head'
 import { isPast, parseISO, intervalToDuration, format, isWithinInterval, isBefore } from 'date-fns'
 import BR from 'date-fns/locale/pt-BR'
 
-import api from 'services/api'
 import axios from 'axios'
 
 import { MuseumCard, VisitsCard } from 'components/index'
@@ -185,7 +184,7 @@ export default function Home() {
           {
             selectedMuseum
               ? <MuseumCard id={museumCardId} museum={selectedMuseum} />
-              : <div style={{ flex: '1' }} />
+              : <div className="card" style={{ flex: '1' }} />
           }
 
           <div className="container-new-visit">
@@ -255,7 +254,7 @@ export default function Home() {
           {
             selectedMuseumVisits && selectedMuseum
               ? <VisitsCard id={museumVisitsId} date={date} visits={selectedMuseumVisits} museum={selectedMuseum} />
-              : <div style={{ flex: '1' }} />
+              : <div className="card" style={{ flex: '1' }} />
           }
 
         </div>

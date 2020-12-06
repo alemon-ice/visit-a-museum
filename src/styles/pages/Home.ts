@@ -108,6 +108,12 @@ export const Container = styled.div`
       }
     }
   }
+
+  @media (max-width: 1200px) {
+    .card {
+      display: none;
+    }
+  }
 `;
 
 export const Footer = styled.div`

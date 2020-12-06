@@ -13,7 +13,7 @@ const MuseumCard = (props: IMuseumCardProps): JSX.Element => {
   const { museum, id } = props
 
   return (
-    <Container id={id}>
+    <Container className="card" id={id}>
       <div className="content">
         <h2>{museum.name}</h2>
 
